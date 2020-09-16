@@ -5,8 +5,9 @@ import torch
 from torch.autograd import Function
 from torchvision import models
 
+
 class FeatureExtractor():
-    """ Class for extracting activations and 
+    """ Class for extracting activations and
     registering gradients from targetted intermediate layers """
 
     def __init__(self, model, target_layers):
@@ -49,10 +50,10 @@ class ModelOutputs():
                 target_activations, x = self.feature_extractor(x)
             elif "avgpool" in name.lower():
                 x = module(x)
-                x = x.view(x.size(0),-1)
+                x = x.view(x.size(0), -1)
             else:
                 x = module(x)
-        
+
         return target_activations, x
 
 
@@ -100,7 +101,7 @@ class GradCam:
         else:
             features, output = self.extractor(input)
 
-        if index == None:
+        if index is None:
             index = np.argmax(output.cpu().data.numpy())
 
         one_hot = np.zeros((1, output.size()[-1]), dtype=np.float32)
@@ -169,7 +170,7 @@ class GuidedBackpropReLUModel:
                 recursive_relu_apply(module)
                 if module.__class__.__name__ == 'ReLU':
                     module_top._modules[idx] = GuidedBackpropReLU.apply
-                
+
         # replace ReLU with GuidedBackpropReLU
         recursive_relu_apply(self.model)
 
@@ -182,7 +183,7 @@ class GuidedBackpropReLUModel:
         else:
             output = self.forward(input)
 
-        if index == None:
+        if index is None:
             index = np.argmax(output.cpu().data.numpy())
 
         one_hot = np.zeros((1, output.size()[-1]), dtype=np.float32)
@@ -218,6 +219,7 @@ def get_args():
 
     return args
 
+
 def deprocess_image(img):
     """ see https://github.com/jacobgil/keras-grad-cam/blob/master/grad-cam.py#L65 """
     img = img - np.mean(img)
@@ -242,7 +244,7 @@ if __name__ == '__main__':
     # feature method, and a classifier method,
     # as in the VGG models in torchvision.
     model = models.resnet50(pretrained=True)
-    grad_cam = GradCam(model=model, feature_module=model.layer4, \
+    grad_cam = GradCam(model=model, feature_module=model.layer4,
                        target_layer_names=["2"], use_cuda=args.use_cuda)
 
     img = cv2.imread(args.image_path, 1)
